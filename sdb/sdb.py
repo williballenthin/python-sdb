@@ -1,11 +1,11 @@
 import logging
+import sys
 
 import vstruct
 from vstruct.primitives import *
 
-
 g_logger = logging.getLogger("sdb")
-
+py3 = sys.version_info >= (3, 0)
 
 class SDBHeader(vstruct.VStruct):
     def __init__(self):
@@ -311,8 +311,9 @@ class SDBItem(vstruct.VStruct):
         # self.value = SDBValueNULL()
 
     def vsParse(self, bytez, offset=0):
-        b1 = ord(bytez[offset])
-        b2 = ord(bytez[offset + 1])
+        b1 = ord(bytez[offset]) if not py3 else bytez[offset]
+        b2 = ord(bytez[offset+1]) if not py3 else bytez[offset+1]
+
         if b1 not in SDB_KNOWN_TAGS and (b2 & 0xF0) << 8 not in SDB_KNOWN_TAG_TYPES:
             g_logger.warning("ignoring byte [offset=%s]: 0x%02x 0x%02x",
                     hex(offset), b1, b2)
