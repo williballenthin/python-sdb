@@ -56,7 +56,7 @@ This script dumps all elements of the shim database format, without resolving re
       <EXE>
         <NAME type='stringref'>0x7e</NAME>
         <APP_NAME type='stringref'>0x9c</APP_NAME>
-        <EXE_ID type='hex'>e8cc2eb5-469c-43bd-9d69-de089e497302</EXE_ID>
+        <EXE_ID type='hex'>YYYYY-YYY-YYY-YYYYY...</EXE_ID>
         <MATCHING_FILE>
           <NAME type='stringref'>0xbe</NAME>
         </MATCHING_FILE>
@@ -93,7 +93,7 @@ This script dumps the `DATABASE` element of a shim database, and resolves value 
       <EXE>
         <NAME type='stringref'>calc.exe</NAME>
         <APP_NAME type='stringref'>XXXengine_Apps</APP_NAME>
-        <EXE_ID type='hex'>e8cc2eb5-469c-43bd-9d69-de089e497302</EXE_ID>
+        <EXE_ID type='hex'>YYYYY-YYY-YYY-YYYYY...</EXE_ID>
         <MATCHING_FILE>
           <NAME type='stringref'>*</NAME>
         </MATCHING_FILE>
@@ -121,7 +121,7 @@ substitutes complete shim definitions for `SHIM_REF` elements.
       <EXE>
         <NAME type='stringref'>calc.exe</NAME>
         <APP_NAME type='stringref'>XXXengine_Apps</APP_NAME>
-        <EXE_ID type='hex'>e8cc2eb5-469c-43bd-9d69-de089e497302</EXE_ID>
+        <EXE_ID type='hex'>YYYYY-YYY-YYY-YYYYY...</EXE_ID>
         <MATCHING_FILE>
           <NAME type='stringref'>*</NAME>
         </MATCHING_FILE>
