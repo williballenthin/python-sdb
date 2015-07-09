@@ -1,2 +1,134 @@
 # python-sdb
 Pure Python parser for Application Compatibility Shim Databases (.sdb files)
+
+## Usage
+Please see the included scripts in the `samples/` directory. You can use these
+to dump and format shim database files for human consumption. They also serve
+as a reference to interacting with the module.
+
+## Examples
+
+### `sdb_dump_raw.py`
+This script dumps all elements of the shim database format, without resolving references.
+
+    $python sdb_dump_raw.py example.sdb
+    <INDEXES>
+      <INDEX>
+        <INDEX_TAG type='integer'>0x7007</INDEX_TAG>
+        <INDEX_KEY type='integer'>0x6001</INDEX_KEY>
+        <INDEX_BITS type='hex'>0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002e54534f484356538e0400002e54534f484356538e040000</INDEX_BITS>
+      </INDEX>
+      <INDEX>
+        <INDEX_TAG type='integer'>0x7007</INDEX_TAG>
+        <INDEX_KEY type='integer'>0x4016</INDEX_KEY>
+        <INDEX_FLAGS type='integer'>0x1</INDEX_FLAGS>
+        <INDEX_BITS type='hex'>000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000</INDEX_BITS>
+      </INDEX>
+      <INDEX>
+        <INDEX_TAG type='integer'>0x7007</INDEX_TAG>
+        <INDEX_KEY type='integer'>0x600b</INDEX_KEY>
+        <INDEX_FLAGS type='integer'>0x1</INDEX_FLAGS>
+        <INDEX_BITS type='hex'>000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000</INDEX_BITS>
+      </INDEX>
+      <INDEX>
+        <INDEX_TAG type='integer'>0x7007</INDEX_TAG>
+        <INDEX_KEY type='integer'>0x6020</INDEX_KEY>
+        <INDEX_FLAGS type='integer'>0x1</INDEX_FLAGS>
+        <INDEX_BITS type='hex'>000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000</INDEX_BITS>
+      </INDEX>
+      <INDEX>
+        <INDEX_TAG type='integer'>0x7007</INDEX_TAG>
+        <INDEX_KEY type='integer'>0x9004</INDEX_KEY>
+        <INDEX_FLAGS type='integer'>0x1</INDEX_FLAGS>
+        <INDEX_BITS type='hex'>000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000284712e0020fce418e040000</INDEX_BITS>
+      </INDEX>
+    </INDEXES>
+    <DATABASE>
+      <OS_PLATFORM type='integer'>0x1</OS_PLATFORM>
+      <NAME type='stringref'>0x6</NAME>
+      <DATABASE_ID type='guid'>XXXXXXX-XX-XXXX-XXXX-XXXX...</DATABASE_ID>
+      <LIBRARY>
+        <SHIM>
+          <NAME type='stringref'>0x30</NAME>
+          <DLLFILE type='stringref'>0x52</DLLFILE>
+        </SHIM>
+      </LIBRARY>
+      <EXE>
+        <NAME type='stringref'>0x7e</NAME>
+        <APP_NAME type='stringref'>0x9c</APP_NAME>
+        <EXE_ID type='hex'>e8cc2eb5-469c-43bd-9d69-de089e497302</EXE_ID>
+        <MATCHING_FILE>
+          <NAME type='stringref'>0xbe</NAME>
+        </MATCHING_FILE>
+        <SHIM_REF>
+          <NAME type='stringref'>0x30</NAME>
+          <SHIM_TAGID type='integer'>0x47c</SHIM_TAGID>
+        </SHIM_REF>
+      </EXE>
+    </DATABASE>
+    <STRINGTABLE>
+      <STRINGTABLE_ITEM type='string'>XXXengine_Database</STRINGTABLE_ITEM>
+      <STRINGTABLE_ITEM type='string'>XXXengine_Shim</STRINGTABLE_ITEM>
+      <STRINGTABLE_ITEM type='string'>Custom\xxx.dll</STRINGTABLE_ITEM>
+      <STRINGTABLE_ITEM type='string'>calc.exe</STRINGTABLE_ITEM>
+      <STRINGTABLE_ITEM type='string'>XXXengine_Apps</STRINGTABLE_ITEM>
+      <STRINGTABLE_ITEM type='string'>*</STRINGTABLE_ITEM>
+    </STRINGTABLE>
+
+
+### `sdb_dump_database.py`
+This script dumps the `DATABASE` element of a shim database, and resolves value references.
+
+    $python sdb_dump_database.py example.sdb
+    <DATABASE>
+      <OS_PLATFORM type='integer'>0x1</OS_PLATFORM>
+      <NAME type='stringref'>XXXengine_Database</NAME>
+      <DATABASE_ID type='guid'>XXXXX-XXX-XXX-XX...</DATABASE_ID>
+      <LIBRARY>
+        <SHIM>
+          <NAME type='stringref'>XXXengine_Shim</NAME>
+          <DLLFILE type='stringref'>Custom\xxx.dll</DLLFILE>
+        </SHIM>
+      </LIBRARY>
+      <EXE>
+        <NAME type='stringref'>calc.exe</NAME>
+        <APP_NAME type='stringref'>XXXengine_Apps</APP_NAME>
+        <EXE_ID type='hex'>e8cc2eb5-469c-43bd-9d69-de089e497302</EXE_ID>
+        <MATCHING_FILE>
+          <NAME type='stringref'>*</NAME>
+        </MATCHING_FILE>
+        <SHIM_REF>
+          <NAME type='stringref'>XXXengine_Shim</NAME>
+          <SHIM_TAGID type='integer'>0x47c</SHIM_TAGID>
+        </SHIM_REF>
+      </EXE>
+    </DATABASE>
+
+### `sdb_dump_shims.py`
+This script dumps the `DATABASE` element of a shim database, resolves value references, and
+substitutes complete shim definitions for `SHIM_REF` elements.
+
+    <DATABASE>
+      <OS_PLATFORM type='integer'>0x1</OS_PLATFORM>
+      <NAME type='stringref'>XXXengine_Database</NAME>
+      <DATABASE_ID type='guid'>XXXXXXX-XXXX-XXX-XXX-XX...</DATABASE_ID>
+      <LIBRARY>
+        <SHIM>
+          <NAME type='stringref'>XXXengine_Shim</NAME>
+          <DLLFILE type='stringref'>Custom\xxx.dll</DLLFILE>
+        </SHIM>
+      </LIBRARY>
+      <EXE>
+        <NAME type='stringref'>calc.exe</NAME>
+        <APP_NAME type='stringref'>XXXengine_Apps</APP_NAME>
+        <EXE_ID type='hex'>e8cc2eb5-469c-43bd-9d69-de089e497302</EXE_ID>
+        <MATCHING_FILE>
+          <NAME type='stringref'>*</NAME>
+        </MATCHING_FILE>
+        <SHIM>
+          <!-- SHIM_REF name:'XXXengine_Shim' offset:0x47c -->
+          <NAME type='stringref'>XXXengine_Shim</NAME>
+          <DLLFILE type='stringref'>Custom\xxx.dll</DLLFILE>
+        </SHIM>
+      </EXE>
+    </DATABASE>
