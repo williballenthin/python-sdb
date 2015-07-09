@@ -4,9 +4,7 @@ import vstruct
 from vstruct.primitives import *
 
 
-logging.basicConfig()
 g_logger = logging.getLogger("sdb")
-g_logger.setLevel(logging.WARN)
 
 
 class SDBHeader(vstruct.VStruct):
@@ -342,17 +340,3 @@ class SDB(vstruct.VStruct):
         self.indexes_root = SDBItem()
         self.database_root = SDBItem()
         self.strtab_root = SDBItem()
-
-def main(sdb_path):
-    logging.basicConfig(level=logging.DEBUG)
-    with open(sdb_path, "rb") as f:
-        buf = f.read()
-
-    s = SDB()
-    s.vsParse(buf)
-    print(s.tree())
-
-
-if __name__ == "__main__":
-    import sys
-    main(*sys.argv[1:])
