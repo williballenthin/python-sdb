@@ -1,8 +1,6 @@
 import sys
 import logging
 
-from enum import Enum
-
 import sdb
 from sdb import SDB_TAGS
 from sdb import SDB_TAG_TYPES
