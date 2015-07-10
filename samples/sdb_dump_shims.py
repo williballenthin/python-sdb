@@ -89,10 +89,7 @@ class SdbDumper(object):
     def __init__(self, db):
         self._db = db
         self._index = SdbIndex()
-        g_logger.info("indexing sdb")
         self._index.index_sdb(self._db)
-        g_logger.info("sdb indexed")
-        self._item_txt_cache = {}  # type: Mapping[int, Sequence[str]]
 
     def _formatValue(self, item):
         m = (item.header.valuetype & 0xF0) << 8
@@ -124,7 +121,7 @@ class SdbDumper(object):
         if item.header.tag == SDB_TAGS.TAG_SHIM_REF:
             ref_item = item_get_child(item, SDB_TAGS.TAG_SHIM_TAGID)
             name_item = item_get_child(item, SDB_TAGS.TAG_NAME)
- 
+
             name_ref = name_item.value
             if not isinstance(name_ref, sdb.SDBValueStringRef):
                 raise RuntimeError("unexpected TAG_NAME value type")
@@ -144,15 +141,8 @@ class SdbDumper(object):
             yield u"{indent:s}<!-- SHIM_REF name:'{name:s}' offset:{offset:s} -->".format(
                 indent=indent + "  ", name=name, offset=hex(shim_ref.value))
 
-            if shim_ref.value in self._item_txt_cache:
-                for l in self._item_txt_cache[shim_ref.value]:
-                    yield l
-            else:
-                txt = []
-                for l in self.dump_item_array(shim_item, indent=indent + "  "):
-                    yield l
-                    txt.append(l)
-                self._item_txt_cache[shim_ref.value] = txt
+            for l in self.dump_item_array(shim_item, indent=indent + "  "):
+                yield l
 
             # have to hardcode the parent tag name, since the ref may point
             #   within the SHIM node
