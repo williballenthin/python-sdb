@@ -6,9 +6,7 @@ from sdb_dump_common import getTagName
 from sdb_dump_common import formatValue
 from sdb_dump_common import formatValueType
 
-logging.basicConfig()
 g_logger = logging.getLogger("sdb_dump_raw")
-g_logger.setLevel(logging.WARN)
 
 
 def dump_item(item, indent=""):
@@ -19,7 +17,7 @@ def dump_item(item, indent=""):
     if v.vsHasField("children"):
         yield u"{indent:s}<{tag:s}>".format(
             indent=indent,
-            tag=getTagName(item.header))
+            tag=str(getTagName(item.header)))
 
         for _, c in v.children:
             if isBadItem(c):
@@ -29,13 +27,13 @@ def dump_item(item, indent=""):
 
         yield u"{indent:s}</{tag:s}>".format(
             indent=indent,
-            tag=getTagName(item.header))
+            tag=str(getTagName(item.header)))
     else:
         yield u"{indent:s}<{tag:s} type='{type_:s}'>{data:s}</{tag:s}>".format(
             indent=indent,
-            type_=formatValueType(item),
+            type_=str(formatValueType(item)),
             data=formatValue(item),
-            tag=getTagName(item.header))
+            tag=str(getTagName(item.header)))
 
 
 def dump(sdb):
@@ -55,10 +53,10 @@ def main(sdb_path):
         buf = f.read()
 
     s = SDB()
-    s.vsParse(buf)
+    s.vsParse(bytearray(buf))
 
     for l in dump(s):
-        sys.stdout.write(l.encode("utf-8"))
+        sys.stdout.write(l)
         sys.stdout.write("\n")
 
 

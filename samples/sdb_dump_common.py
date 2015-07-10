@@ -14,11 +14,10 @@ def getTagName(header):
     tagname = SDB_TAGS.vsReverseMapping(header.tag)
     if tagname is None:
         return "UNKNOWN_%s" % (hex(header.tag & 0xFF0F))
-    return tagname.partition("TAG_")[2]
+    return str(tagname.partition("TAG_")[2])
 
 
-def formatGuid(b):
-    h = map(ord, b)
+def formatGuid(h):
     return "%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x" % \
         (h[3], h[2], h[1], h[0],
         h[5], h[4],
@@ -48,7 +47,7 @@ def formatValue(item):
         if item.value.size == 0x10 and getTagName(item.header).endswith("_ID"):
             return formatGuid(item.value.value)
         else:
-            return binascii.hexlify(item.value.value)
+            return str(binascii.hexlify(item.value.value))
     else:
         raise RuntimeError("cannot format unknown value type: 0x%x", item.header.valuetype)
 
@@ -81,5 +80,3 @@ def formatValueType(item):
 
 def isBadItem(item):
     return item.vsHasField("unknown")
-
-

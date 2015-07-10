@@ -84,11 +84,11 @@ def main(sdb_path):
         buf = f.read()
 
     s = SDB()
-    s.vsParse(buf)
+    s.vsParse(bytearray(buf))
 
     d = Dumper(s)
     for l in d.dump():
-        sys.stdout.write(l.encode("utf-8"))
+        sys.stdout.write(l)
         sys.stdout.write("\n")
 
 
