@@ -21,9 +21,17 @@ setup(
     author_email='willi.ballenthin@gmail.com',
     url='https://github.com/williballenthin/python-sdb',
     license='Apache License 2.0',
-    install_requires=["vivisect-vstruct-wb==1.0.1b1"],
+    install_requires=["vivisect-vstruct-wb>=1.0.1b1"],
 
     packages=find_packages(exclude=['*.tests','*.tests.*']),
+    entry_points={
+        "console_scripts": [
+            "sdb_dump_database=scripts.sdb_dump_database:main",
+            "sdb_dump_raw=scripts.sdb_dump_raw:main",
+            "sdb_dump_shims=scripts.sdb_dump_shims:main",
+            "sdb_dump_info=scripts.sdb_dump_info:main",
+        ]
+      },
 
     classifiers=[
         'License :: OSI Approved :: Apache Software License',

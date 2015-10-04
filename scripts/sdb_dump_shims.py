@@ -8,84 +8,16 @@ from sdb_dump_common import isBadItem
 from sdb_dump_common import getTagName
 from sdb_dump_common import formatValue
 from sdb_dump_common import formatValueType
+from sdb_dump_common import SdbIndex
+from sdb_dump_common import item_get_child
+
 
 logging.basicConfig()
 g_logger = logging.getLogger("sdb_dump_shims")
 g_logger.setLevel(logging.DEBUG)
 
 
-def item_get_child(item, child_tag):
-    v = item.value
-    if not v.vsHasField("children"):
-        raise RuntimeError("item doesnt have children")
-    for _, c in v.children:
-        if isBadItem(c):
-            continue
-        if c.header.tag == child_tag:
-            return c
-    raise IndexError("failed to find child with tag %s", hex(child_tag))
-
-
-class SdbIndex(object):
-    def __init__(self):
-        self._itemindex = {}  # type: Mapping[int, SdbItem]
-        self._strindex = {}  # type: Mapping[int, str]
-
-    def index_sdb(self, db):
-        o = len(db.header)
-        indexes_root = db.indexes_root
-        self._itemindex_item(o, indexes_root)
-        o += len(indexes_root)
-
-        database_root = db.database_root
-        self._itemindex_item(o, database_root)
-        o += len(database_root)
-
-        strtab_root = db.strtab_root
-        self._itemindex_item(o, strtab_root)
-        o += len(strtab_root)
-
-        # len(strtab) - len(strtab value) == 6
-        # 01 78 ?? ?? ?? ?? (children_size:uint32)
-        offset = 0x6
-        for fieldname, field in db.strtab_root.value.children.vsGetFields():
-            if isBadItem(field):
-                offset += len(field)
-                continue
-            self._strindex[offset] = field.value.value
-            offset += len(field)
-
-    def _itemindex_item(self, offset, item):
-        value = item.value
-
-        # some items may have the same starting offset, so we take the first one
-        # eg. given an item array, and the first item in the array, we want the array
-        if offset not in self._itemindex:
-            self._itemindex[offset] = item
-
-        if value.vsHasField("children"):
-            offset += value.vsGetOffset("children")
-            children = value.children
-            self._itemindex[offset] = children
-            for child_id, child in children:
-                if isBadItem(child):
-                    offset += len(child)
-                    continue
-                # you might be tempted to use vsGetOffset(child_id)... don't.
-                # internally it has to iterate all fields and do a __len__ on them,
-                #   so this ends up taking quadratic time.
-                # instead, we track the offset ourselves.
-                self._itemindex_item(offset, child)
-                offset += len(child)
-
-    def get_item(self, offset):
-        return self._itemindex[offset]
-
-    def get_string(self, offset):
-        return self._strindex[offset]
-
-
-class SdbDumper(object):
+class SdbShimDumper(object):
     def __init__(self, db):
         self._db = db
         self._index = SdbIndex()
@@ -174,7 +106,7 @@ class SdbDumper(object):
             yield i
 
 
-def main(sdb_path):
+def _main(sdb_path):
     from sdb import SDB
     with open(sdb_path, "rb") as f:
         buf = f.read()
@@ -182,12 +114,16 @@ def main(sdb_path):
     s = SDB()
     s.vsParse(bytearray(buf))
 
-    d = SdbDumper(s)
+    d = SdbShimDumper(s)
     for l in d.dump_database():
-        sys.stdout.write(l)
+        sys.stdout.write(l.encode("utf-8"))
         sys.stdout.write("\n")
 
 
-if __name__ == "__main__":
+def main():
     import sys
-    main(*sys.argv[1:])
+    return sys.exit(_main(*sys.argv[1:]))
+
+
+if __name__ == "__main__":
+    main()

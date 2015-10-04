@@ -47,7 +47,7 @@ def dump(sdb):
         yield i
 
 
-def main(sdb_path):
+def _main(sdb_path):
     from sdb import SDB
     with open(sdb_path, "rb") as f:
         buf = f.read()
@@ -56,10 +56,14 @@ def main(sdb_path):
     s.vsParse(bytearray(buf))
 
     for l in dump(s):
-        sys.stdout.write(l)
+        sys.stdout.write(l.encode("utf-8"))
         sys.stdout.write("\n")
 
 
-if __name__ == "__main__":
+def main():
     import sys
-    main(*sys.argv[1:])
+    sys.exit(_main(*sys.argv[1:]))
+
+
+if __name__ == "__main__":
+    main()

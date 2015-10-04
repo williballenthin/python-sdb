@@ -12,8 +12,7 @@ g_logger = logging.getLogger("sdb_dump_database")
 g_logger.setLevel(logging.WARN)
 
 
-
-class Dumper(object):
+class SdbDatabaseDumper(object):
     def __init__(self, sdb):
         self._sdb = sdb
         self._strindex = None
@@ -77,7 +76,7 @@ class Dumper(object):
             yield i
 
 
-def main(sdb_path):
+def _main(sdb_path):
     from sdb import SDB
 
     with open(sdb_path, "rb") as f:
@@ -86,12 +85,16 @@ def main(sdb_path):
     s = SDB()
     s.vsParse(bytearray(buf))
 
-    d = Dumper(s)
+    d = SdbDatabaseDumper(s)
     for l in d.dump():
-        sys.stdout.write(l)
+        sys.stdout.write(l.encode("utf-8"))
         sys.stdout.write("\n")
 
 
-if __name__ == "__main__":
+def main():
     import sys
-    main(*sys.argv[1:])
+    return sys.exit(_main(*sys.argv[1:]))
+
+
+if __name__ == "__main__":
+    main()

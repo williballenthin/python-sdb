@@ -178,6 +178,9 @@ class SDBItemHeader(vstruct.VStruct):
     def tag(self):
         return (self.valuetype << 8) | self.tagtype
 
+    def __str__(self):
+        return "SDBItemHeader(tagtype: 0x%x, valuetype: 0x%x)" % (self.tagtype, self.valuetype)
+
 
 class SDBItemArray(vstruct.VArray):
     def __init__(self, size=0):
@@ -332,6 +335,10 @@ class SDBItem(vstruct.VStruct):
     def pcb_header(self):
         c = getItemClass(self.header)
         self.vsSetField("value", c())
+
+    def __str__(self):
+        return "SDBItem(tag: 0x%x, type: %s)" % (self.header.tag,
+                                               self["value"].__class__.__name__)
 
 
 class SDB(vstruct.VStruct):
