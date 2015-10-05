@@ -51,30 +51,61 @@ class SdbShimDumper(object):
         #  - MSI_TRANSFORM_REF
         #  - FLAG_REF
         if item.header.tag == SDB_TAGS.TAG_SHIM_REF:
-            ref_item = item_get_child(item, SDB_TAGS.TAG_SHIM_TAGID)
-            name_item = item_get_child(item, SDB_TAGS.TAG_NAME)
-
-            name_ref = name_item.value
-            if not isinstance(name_ref, sdb.SDBValueStringRef):
-                raise RuntimeError("unexpected TAG_NAME value type")
-            name = self._index.get_string(name_ref.reference)
-
-            shim_ref = ref_item.value
-            if not isinstance(shim_ref, sdb.SDBValueDword):
-                raise RuntimeError("unexpected SHIM_TAGID value type")
-            shim_item = self._index.get_item(shim_ref.value)
-
             # have to hardcode the parent tag name, since the ref may point
             #   within the SHIM node
             yield u"{indent:s}<{tag:s}>".format(
                 indent=indent,
                 tag="SHIM")
 
-            yield u"{indent:s}<!-- SHIM_REF name:'{name:s}' offset:{offset:s} -->".format(
-                indent=indent + "  ", name=name, offset=hex(shim_ref.value))
+            ref_item = None
+            name_item = None
+            try:
+                ref_item = item_get_child(item, SDB_TAGS.TAG_SHIM_TAGID)
+            except IndexError:
+                yield u"{indent:s}<!-- SHIM_REF missing SHIM_TAGID -->".format(
+                    indent=indent + "  ")
+                
+            try:
+                name_item = item_get_child(item, SDB_TAGS.TAG_NAME)
+            except IndexError:
+                yield u"{indent:s}<!-- SHIM_REF missing NAME -->".format(
+                    indent=indent + "  ")
 
-            for l in self.dump_item_array(shim_item, indent=indent + "  "):
-                yield l
+            if ref_item and name_item:
+                name_ref = name_item.value
+                if not isinstance(name_ref, sdb.SDBValueStringRef):
+                    raise RuntimeError("unexpected TAG_NAME value type")
+                name = self._index.get_string(name_ref.reference)
+
+                shim_ref = ref_item.value
+                if not isinstance(shim_ref, sdb.SDBValueDword):
+                    raise RuntimeError("unexpected SHIM_TAGID value type")
+                shim_item = self._index.get_item(shim_ref.value)
+
+                yield u"{indent:s}<!-- SHIM_REF name:'{name:s}' offset:{offset:s} -->".format(
+                    indent=indent + "  ", name=name, offset=hex(shim_ref.value))
+
+                for l in self.dump_item_array(shim_item, indent=indent + "  "):
+                    yield l
+            else:
+                yield u"{indent:s}<!-- unresolved SHIM_REF -->".format(
+                    indent=indent + "  ")
+
+                if name_item:
+                    name_ref = name_item.value
+                    if not isinstance(name_ref, sdb.SDBValueStringRef):
+                        raise RuntimeError("unexpected TAG_NAME value type")
+                    name = self._index.get_string(name_ref.reference)
+                    yield u"{indent:s}<!-- SHIM_REF name:'{name:s}' -->".format(
+                        indent=indent + "  ", name=name)
+
+                if ref_item:
+                    shim_ref = ref_item.value
+                    if not isinstance(shim_ref, sdb.SDBValueDword):
+                        raise RuntimeError("unexpected SHIM_TAGID value type")
+                    shim_item = self._index.get_item(shim_ref.value)
+                    yield u"{indent:s}<!-- SHIM_REF offset:'{offset:s}' -->".format(
+                        indent=indent + "  ", offset=hex(shim_ref.value))
 
             # have to hardcode the parent tag name, since the ref may point
             #   within the SHIM node
@@ -102,6 +133,7 @@ class SdbShimDumper(object):
 
 
     def dump_database(self):
+        yield '<?xml version="1.0" encoding="UTF-8"?>'
         for i in self.dump_item(self._db.database_root):
             yield i
 
@@ -112,7 +144,11 @@ def _main(sdb_path):
         buf = f.read()
 
     s = SDB()
-    s.vsParse(bytearray(buf))
+    try:
+        s.vsParse(bytearray(buf))
+    except sdb.InvalidSDBFileError:
+        g_logger.error("not an SDB file: %s" % (sdb_path))
+        return -1
 
     d = SdbShimDumper(s)
     for l in d.dump_database():
