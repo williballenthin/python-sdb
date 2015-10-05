@@ -1,6 +1,7 @@
 import base64
 import logging
 import binascii
+import string
 import xml.sax.saxutils
 
 from sdb import SDB_TAGS
@@ -14,7 +15,13 @@ def getTagName(header):
     tagname = SDB_TAGS.vsReverseMapping(header.tag)
     if tagname is None:
         return "UNKNOWN_%s" % (hex(header.tag & 0xFF0F))
-    return str(tagname.partition("TAG_")[2])
+    tagname = str(tagname.partition("TAG_")[2])
+
+    # valid XML cannot begin with a digit
+    if tagname[0] in string.digits:
+        return "_" + tagname
+    else:
+        return tagname
 
 
 def formatGuid(h):
@@ -150,5 +157,5 @@ def item_get_child(item, child_tag):
             continue
         if c.header.tag == child_tag:
             return c
-    raise IndexError("failed to find child with tag %s", hex(child_tag))
+    raise IndexError("failed to find child with tag %s"  % hex(child_tag))
 
