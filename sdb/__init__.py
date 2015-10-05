@@ -13,3 +13,4 @@ from .sdb import SDBValueDword
 from .sdb import SDBValueQword
 from .sdb import SDBValueStringRef
 from .sdb import SDBItem
+from .sdb import InvalidSDBFileError

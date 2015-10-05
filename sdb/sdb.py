@@ -7,12 +7,20 @@ from vstruct.primitives import *
 g_logger = logging.getLogger("sdb")
 
 
+class InvalidSDBFileError(Exception):
+    pass
+
+
 class SDBHeader(vstruct.VStruct):
     def __init__(self):
         vstruct.VStruct.__init__(self)
         self.unknown0 = v_uint32()
         self.unknown1 = v_uint32()
         self.magic = v_str(size=4)
+
+    def pcb_magic(self):
+        if self.magic != "sdbf":
+            raise InvalidSDBFileError("invalid magic")
 
 
 SDB_TAG_TYPES = v_enum()
