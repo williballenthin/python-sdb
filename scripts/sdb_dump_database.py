@@ -5,6 +5,7 @@ from sdb_dump_common import isBadItem
 from sdb_dump_common import getTagName
 from sdb_dump_common import formatValue
 from sdb_dump_common import formatValueType
+from sdb_dump_common import SdbIndex
 from sdb import SDB_TAG_TYPES
 
 logging.basicConfig()
@@ -15,30 +16,14 @@ g_logger.setLevel(logging.WARN)
 class SdbDatabaseDumper(object):
     def __init__(self, sdb):
         self._sdb = sdb
-        self._strindex = None
-
-    def _build_string_index(self):
-        self._strindex = {}
-        children = self._sdb.strtab_root.value.children
-
-        # len(strtab) - len(strtab value) == 6
-        # 01 78 ?? ?? ?? ?? (children_size:uint32)
-        offset = 0x6
-        for fieldname, field in children.vsGetFields():
-            if isBadItem(field):
-                continue
-            self._strindex[offset] = field
-            offset += len(field)
+        self._strindex = SdbIndex()
+        self._strindex.index_sdb(sdb)
 
     def _formatValue(self, item):
         m = (item.header.valuetype & 0xF0) << 8
         if m == SDB_TAG_TYPES.TAG_TYPE_STRINGREF:
             ref = item.value.reference
-            if self._strindex is None:
-                raise RuntimeError("strings not indexed")
-            if ref not in self._strindex:
-                return "UNRESOLVED_STRINGREF:" + hex(ref)
-            return self._strindex[ref].value.value
+            return self._strindex.get_string(ref)
         else:
             return formatValue(item)
 
