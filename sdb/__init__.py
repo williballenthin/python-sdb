@@ -14,3 +14,6 @@ from .sdb import SDBValueQword
 from .sdb import SDBValueStringRef
 from .sdb import SDBItem
 from .sdb import InvalidSDBFileError
+
+from .patchbits import PATCH_ACTIONS
+from .patchbits import PATCHBITS

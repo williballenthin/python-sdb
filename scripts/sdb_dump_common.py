@@ -148,14 +148,24 @@ class SdbIndex(object):
         return xml.sax.saxutils.escape(self._strindex[offset])
 
 
-def item_get_child(item, child_tag):
+def item_get_children(item, child_tag):
     v = item.value
     if not v.vsHasField("children"):
         raise RuntimeError("item doesnt have children")
+
     for _, c in v.children:
         if isBadItem(c):
             continue
         if c.header.tag == child_tag:
-            return c
+            yield c
+
+
+def item_get_child(item, child_tag):
+    v = item.value
+    if not v.vsHasField("children"):
+        raise RuntimeError("item doesnt have children")
+ 
+    for c in item_get_children(item, child_tag):
+        return c
     raise IndexError("failed to find child with tag %s"  % hex(child_tag))
 

@@ -14,7 +14,7 @@ from sdb_dump_common import item_get_child
 
 logging.basicConfig()
 g_logger = logging.getLogger("sdb_dump_shims")
-g_logger.setLevel(logging.DEBUG)
+g_logger.setLevel(logging.INFO)
 
 
 class SdbShimDumper(object):
@@ -64,12 +64,14 @@ class SdbShimDumper(object):
             except IndexError:
                 yield u"{indent:s}<!-- SHIM_REF missing SHIM_TAGID -->".format(
                     indent=indent + "  ")
+                g_logger.debug("SHIM_REF mssing SHIM_TAGID")
                 
             try:
                 name_item = item_get_child(item, SDB_TAGS.TAG_NAME)
             except IndexError:
                 yield u"{indent:s}<!-- SHIM_REF missing NAME -->".format(
                     indent=indent + "  ")
+                g_logger.debug("SHIM_REF mssing NAME")
 
             if ref_item and name_item:
                 name_ref = name_item.value
@@ -90,6 +92,7 @@ class SdbShimDumper(object):
             else:
                 yield u"{indent:s}<!-- unresolved SHIM_REF -->".format(
                     indent=indent + "  ")
+                g_logger.debug("unresolved SHIM_REF")
 
                 if name_item:
                     name_ref = name_item.value
