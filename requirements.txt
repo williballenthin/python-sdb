@@ -1,1 +1,1 @@
-vivisect-vstruct-wb==1.0.1b1
+vivisect-vstruct-wb==1.0.3

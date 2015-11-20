@@ -21,7 +21,7 @@ setup(
     author_email='willi.ballenthin@gmail.com',
     url='https://github.com/williballenthin/python-sdb',
     license='Apache License 2.0',
-    install_requires=["vivisect-vstruct-wb>=1.0.1b1"],
+    install_requires=["vivisect-vstruct-wb>=1.0.3"],
 
     packages=find_packages(exclude=['*.tests','*.tests.*']),
     entry_points={
