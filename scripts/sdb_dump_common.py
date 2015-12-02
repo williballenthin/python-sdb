@@ -14,7 +14,7 @@ g_logger.setLevel(logging.DEBUG)
 def getTagName(header):
     tagname = SDB_TAGS.vsReverseMapping(header.tag)
     if tagname is None:
-        return "UNKNOWN_%s" % (hex(header.tag & 0xFF0F))
+        return "UNKNOWN_%s" % (hex(header.tag & 0xFFFF))
     tagname = str(tagname.partition("TAG_")[2])
 
     # valid XML cannot begin with a digit
