@@ -227,7 +227,7 @@ class SDBValueList(vstruct.VStruct):
         self["children"].vsSetLength(self.size)
 
     def __len__(self):
-        return self.size + 0x4
+        return self.size + (self.size % 2) + 0x4
 
 
 class SDBValueString(vstruct.VStruct):
@@ -253,7 +253,7 @@ class SDBValueBinary(vstruct.VStruct):
         self["value"].vsSetLength(self.size)
 
     def __len__(self):
-        return self.size + 0x4
+        return self.size + (self.size % 2) + 0x4
 
 
 class SDBValueNull(vstruct.VStruct):
