@@ -38,23 +38,35 @@ class SdbInfoDumper(object):
         name = self._index.get_string(name_ref)
         yield "name: %s" % name
 
-        database_id = item_get_child(self._db.database_root,
-                                     SDB_TAGS.TAG_DATABASE_ID).value.value
-        database_id = formatGuid(database_id)
-        yield "database id: %s" % database_id
+        try:
+            database_id = item_get_child(self._db.database_root,
+                                         SDB_TAGS.TAG_DATABASE_ID).value.value
+            database_id = formatGuid(database_id)
+            yield "database id: %s" % database_id
+        except KeyError:
+            pass
 
-        ts = item_get_child(self._db.database_root, SDB_TAGS.TAG_TIME).value.value
-        ts = parse_windows_timestamp(ts)
-        yield "timestamp: %s" % ts
+        try:
+            ts = item_get_child(self._db.database_root, SDB_TAGS.TAG_TIME).value.value
+            ts = parse_windows_timestamp(ts)
+            yield "timestamp: %s" % ts
+        except KeyError:
+            pass
 
-        compiler_version_ref = item_get_child(self._db.database_root,
-                                              SDB_TAGS.TAG_COMPILER_VERSION).value.reference
-        compiler_version = self._index.get_string(compiler_version_ref)
-        yield "compiler version: %s" % compiler_version
+        try:
+            compiler_version_ref = item_get_child(self._db.database_root,
+                                                  SDB_TAGS.TAG_COMPILER_VERSION).value.reference
+            compiler_version = self._index.get_string(compiler_version_ref)
+            yield "compiler version: %s" % compiler_version
+        except KeyError:
+            pass
 
-        os_platform = hex(item_get_child(self._db.database_root,
-                                         SDB_TAGS.TAG_OS_PLATFORM).value.value)
-        yield "os platform: %s" % os_platform
+        try:
+            os_platform = hex(item_get_child(self._db.database_root,
+                                             SDB_TAGS.TAG_OS_PLATFORM).value.value)
+            yield "os platform: %s" % os_platform
+        except KeyError:
+            pass
 
 
 def _main(sdb_path):
