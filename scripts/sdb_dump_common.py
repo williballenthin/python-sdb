@@ -164,8 +164,8 @@ def item_get_child(item, child_tag):
     v = item.value
     if not v.vsHasField("children"):
         raise RuntimeError("item doesnt have children")
- 
+
     for c in item_get_children(item, child_tag):
         return c
-    raise IndexError("failed to find child with tag %s"  % hex(child_tag))
+    raise KeyError("failed to find child with tag %s"  % hex(child_tag))
 
