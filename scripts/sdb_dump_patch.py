@@ -1,6 +1,7 @@
 import sys
 import logging
 
+import hexdump
 import vstruct
 import vivisect
 import envi
@@ -49,6 +50,27 @@ class GreedyVArray(vstruct.VArray):
         raise NotImplementedError()
 
 
+def dump_patch(bits):
+    ps = GreedyVArray(sdb.PATCHBITS)
+    ps.vsParse(bits.value.value)
+
+    for i, _ in ps:
+        p = ps[int(i)]
+
+        print("  opcode: %s" % str(p["opcode"]))
+        print("  module name: %s" % p.module_name)
+        print("  rva: 0x%08x" % p.rva)
+        print("  unk: 0x%08x" % p.unknown)
+
+        print("  payload:")
+        print(hexdump.hexdump(str(p.pattern), result="return"))
+
+        print("  disassembly:")
+        for l in disassemble(str(p.pattern), p.rva):
+            print("    " + l)
+        print("")
+
+
 def _main(sdb_path, patch_name):
     from sdb import SDB
     with open(sdb_path, "rb") as f:
@@ -64,25 +86,32 @@ def _main(sdb_path, patch_name):
     index.index_sdb(s)
     g_logger.debug("done indexing strings")
 
-    library = item_get_child(s.database_root, SDB_TAGS.TAG_LIBRARY)
+    try:
+        library = item_get_child(s.database_root, SDB_TAGS.TAG_LIBRARY)
+    except KeyError:
+        pass
+    else:
+        for shim_ref in item_get_children(library, SDB_TAGS.TAG_SHIM_REF):
+            patch = item_get_child(shim_ref, SDB_TAGS.TAG_PATCH)
+            name_ref = item_get_child(patch, SDB_TAGS.TAG_NAME)
+            name = index.get_string(name_ref.value.reference)
+            if name != patch_name:
+                continue
 
-    for shim_ref in item_get_children(library, SDB_TAGS.TAG_SHIM_REF):
-        patch = item_get_child(shim_ref, SDB_TAGS.TAG_PATCH)
+            bits = item_get_child(patch, SDB_TAGS.TAG_PATCH_BITS)
+            dump_bits(bits)
+
+    try:
+        patch = item_get_child(s.database_root, SDB_TAGS.TAG_PATCH)
+    except KeyError:
+        print('no patch')
+    else:
         name_ref = item_get_child(patch, SDB_TAGS.TAG_NAME)
         name = index.get_string(name_ref.value.reference)
-        bits = item_get_child(patch, SDB_TAGS.TAG_PATCH_BITS)
 
         if name == patch_name:
-            ps = GreedyVArray(sdb.PATCHBITS)
-            ps.vsParse(bits.value.value)
-
-            for i, _ in ps:
-                p = ps[int(i)]
-                print(p.tree())
-                print("  disassembly:")
-                for l in disassemble(str(p.pattern), p.rva):
-                    print("    " + l)
-                print("")
+            bits = item_get_child(patch, SDB_TAGS.TAG_PATCH_BITS)
+            dump_patch(bits)
 
 
 def main():
