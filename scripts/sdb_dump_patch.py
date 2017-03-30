@@ -5,7 +5,8 @@ import hexdump
 import vstruct
 import vivisect
 import envi
-import envi.archs.i386 as M
+import envi.archs.i386 as x86
+import envi.archs.amd64 as x64
 
 import sdb
 from sdb import SDB_TAGS
@@ -19,8 +20,18 @@ g_logger = logging.getLogger("sdb_dump_patch")
 g_logger.setLevel(logging.DEBUG)
 
 
-def disassemble(buf, base=0):
-    d = M.i386Disasm()
+ARCH_32 = "32"
+ARCH_64 = "64"
+
+
+def disassemble(buf, base=0, arch=ARCH_32):
+    if arch == ARCH_32:
+        d = x86.i386Disasm()
+    elif arch == ARCH_64:
+        d = x64.Amd64Disasm()
+    else:
+        raise RuntimeError('unknown arch: ' + str(arch))
+
     offset = 0
     while True:
         if offset >= len(buf):
@@ -50,7 +61,7 @@ class GreedyVArray(vstruct.VArray):
         raise NotImplementedError()
 
 
-def dump_patch(bits):
+def dump_patch(bits, arch=ARCH_32):
     ps = GreedyVArray(sdb.PATCHBITS)
     ps.vsParse(bits.value.value)
 
@@ -66,7 +77,7 @@ def dump_patch(bits):
         print(hexdump.hexdump(str(p.pattern), result="return"))
 
         print("  disassembly:")
-        for l in disassemble(str(p.pattern), p.rva):
+        for l in disassemble(str(p.pattern), p.rva, arch=arch):
             print("    " + l)
         print("")
 
@@ -99,19 +110,19 @@ def _main(sdb_path, patch_name):
                 continue
 
             bits = item_get_child(patch, SDB_TAGS.TAG_PATCH_BITS)
-            dump_bits(bits)
+            dump_bits(bits, arch=ARCH_32)
 
     try:
         patch = item_get_child(s.database_root, SDB_TAGS.TAG_PATCH)
     except KeyError:
-        print('no patch')
+        pass
     else:
         name_ref = item_get_child(patch, SDB_TAGS.TAG_NAME)
         name = index.get_string(name_ref.value.reference)
 
         if name == patch_name:
             bits = item_get_child(patch, SDB_TAGS.TAG_PATCH_BITS)
-            dump_patch(bits)
+            dump_bits(bits, arch=ARCH_32)
 
 
 def main():
