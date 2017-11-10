@@ -11,7 +11,6 @@ from sdb_dump_common import formatValueType
 from sdb_dump_common import SdbIndex
 from sdb_dump_common import item_get_child
 
-
 logging.basicConfig()
 g_logger = logging.getLogger("sdb_dump_shims")
 g_logger.setLevel(logging.INFO)
@@ -61,17 +60,17 @@ class SdbShimDumper(object):
             name_item = None
             try:
                 ref_item = item_get_child(item, SDB_TAGS.TAG_SHIM_TAGID)
-            except IndexError:
+            except KeyError:
                 yield u"{indent:s}<!-- SHIM_REF missing SHIM_TAGID -->".format(
                     indent=indent + "  ")
-                g_logger.debug("SHIM_REF mssing SHIM_TAGID")
-                
+                g_logger.debug("SHIM_REF missing SHIM_TAGID")
+
             try:
                 name_item = item_get_child(item, SDB_TAGS.TAG_NAME)
-            except IndexError:
+            except KeyError:
                 yield u"{indent:s}<!-- SHIM_REF missing NAME -->".format(
                     indent=indent + "  ")
-                g_logger.debug("SHIM_REF mssing NAME")
+                g_logger.debug("SHIM_REF missing NAME")
 
             if ref_item and name_item:
                 name_ref = name_item.value
@@ -121,7 +120,7 @@ class SdbShimDumper(object):
                 indent=indent,
                 tag=getTagName(item.header))
 
-            for l in self.dump_item_array(v.children, indent=indent+"  "):
+            for l in self.dump_item_array(v.children, indent=indent + "  "):
                 yield l
 
             yield u"{indent:s}</{tag:s}>".format(
@@ -133,7 +132,6 @@ class SdbShimDumper(object):
                 type_=formatValueType(item),
                 data=self._formatValue(item),
                 tag=getTagName(item.header))
-
 
     def dump_database(self):
         yield '<?xml version="1.0" encoding="UTF-8"?>'
@@ -161,7 +159,7 @@ def _main(sdb_path):
 
 def main():
     import sys
-    return sys.exit(_main(*sys.argv[1:]))
+    return sys.exit(_main("../tests/1.sdb"))
 
 
 if __name__ == "__main__":
