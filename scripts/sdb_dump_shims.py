@@ -159,7 +159,7 @@ def _main(sdb_path):
 
 def main():
     import sys
-    return sys.exit(_main("../tests/1.sdb"))
+    return sys.exit(_main(*sys.argv[1:]))
 
 
 if __name__ == "__main__":
