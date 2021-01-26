@@ -110,7 +110,7 @@ def _main(sdb_path, patch_name):
                 continue
 
             bits = item_get_child(patch, SDB_TAGS.TAG_PATCH_BITS)
-            dump_bits(bits, arch=ARCH_32)
+            dump_patch(bits, arch=ARCH_32)
 
     try:
         patch = item_get_child(s.database_root, SDB_TAGS.TAG_PATCH)
@@ -122,7 +122,7 @@ def _main(sdb_path, patch_name):
 
         if name == patch_name:
             bits = item_get_child(patch, SDB_TAGS.TAG_PATCH_BITS)
-            dump_bits(bits, arch=ARCH_32)
+            dump_patch(bits, arch=ARCH_32)
 
 
 def main():
